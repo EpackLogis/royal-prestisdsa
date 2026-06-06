@@ -2010,7 +2010,7 @@ function renderCitas() {
          <button class="btn-icon" style="color:var(--red)" onclick="delDoc('citas','${c.id}')"><i class="ti ti-trash"></i></button>`
       : '';
     const termineBtn = (c.estado==='Pendiente'||c.estado==='Confirmada')
-      ? `<button class="btn btn-sm btn-outline" style="color:var(--green)" onclick="abrirCompletarCita('${c.id}')"><i class="ti ti-check"></i> Ya terminé</button>`
+      ? `<button class="btn btn-sm btn-outline" style="color:var(--green)" onclick="abrirCompletarCita('${c.id}')"><i class="ti ti-check"></i> Ya erminé</button>`
       : '';
     return `<tr>
       <td onclick="abrirDetalleCita('${c.id}')" style="cursor:pointer"><div class="cl-nm">${esc(c.clienteNombre||'')}</div><div class="cl-mt">${esc(c.telefono||'')} ${c.barrio?'· '+esc(c.barrio):''}</div></td>
