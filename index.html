@@ -581,8 +581,8 @@ tr.cita-row:hover td { background: #FBF5E6 !important; }
                 <div class="ctr"><span class="ctr-l">Saldo a financiar</span><span class="ctr-v" id="calc-r-saldo">$0</span></div>
                 <div class="ctr" id="calc-r-ea-row"><span class="ctr-l" style="font-size:11px">Tasa EA configurada</span><span class="ctr-v" id="calc-r-ea" style="font-size:11px;color:rgba(255,255,255,.6)">—</span></div>
                 <div class="ctr" id="calc-r-tv-row"><span class="ctr-l" style="font-size:11px">Tasa vigente hoy</span><span class="ctr-v" id="calc-r-tv" style="font-size:11px;color:rgba(255,255,255,.6)">—</span></div>
-                <div class="ctr" id="calc-r-tasa-row" style="display:none"><span class="ctr-l">Tasa mensual efectiva (tabla)</span><span class="ctr-v" id="calc-r-tasa-m">—</span></div>
-                <div class="ctr" id="calc-r-cuota-row" style="display:none"><span class="ctr-l">Cuota mínima mensual</span><span class="ctr-v" id="calc-r-cuota">$0</span></div>
+                <div class="ctr" id="calc-r-tasa-row" style="display:none"><span class="ctr-l">Tasa tabla · fórmula: Saldo × Tasa</span><span class="ctr-v" id="calc-r-tasa-m">—</span></div>
+                <div class="ctr" id="calc-r-cuota-row" style="display:none"><span class="ctr-l">Pago mínimo mensual</span><span class="ctr-v" id="calc-r-cuota" style="font-size:18px;font-weight:700;color:var(--gold)">$0</span></div>
                 <div class="ctr" id="calc-r-tarjeta-row" style="display:none"><span class="ctr-l">Cuota por tarjeta</span><span class="ctr-v" id="calc-r-tarjeta-cuota">$0</span></div>
               </div>
             </div>
@@ -1947,7 +1947,7 @@ function calcular() {
 
   let cuota=0, tarjetaCuota=0, totalPagar=totalConIva;
   if(tipo==='Financiado' && saldo>0 && n>0) {
-    cuota = tasaM===0 ? saldo/n : saldo*tasaM;
+    cuota = tasaM===0 ? saldo/n : saldo*tasaM/(1-Math.pow(1+tasaM,-n));
     totalPagar = deposito + cuota*n;
   }
   if(tipo==='Tarjeta' && saldo>0) {
@@ -1964,12 +1964,11 @@ function calcular() {
   setText('calc-r-total-iva',     fmtCOP(totalConIva));  // total con IVA = valor ingresado
   setText('calc-r-deposito',      fmtCOP(deposito));
   setText('calc-r-saldo',         fmtCOP(saldo));
-  setText('calc-r-tasa-m',        (tasaM*100).toFixed(2)+'% MU · '+n+' cuotas');
+  setText('calc-r-tasa-m',        (tasaM*100).toFixed(2)+'% MU × saldo = pago mínimo');
   const tl = byId('calc-tasa-label');
   if(tl) tl.textContent = '→ '+( tasaM*100).toFixed(2)+'% MU';
   setText('calc-r-cuota',         fmtCOP(Math.ceil(cuota)));
   setText('calc-r-tarjeta-cuota', fmtCOP(Math.ceil(tarjetaCuota)));
-  // total pagar hidden
 }
 
 function calcularDetalle() {
@@ -1980,12 +1979,12 @@ function calcularDetalle() {
   const tasaM=getAmortRate(n);
   const vf=byId('vd-calc-fin'); if(vf) vf.style.display=tipo==='Financiado'?'':'none';
   const cr=byId('vd-r-cuota-row'); if(cr) cr.style.display=tipo==='Financiado'?'':'none';
-  let cuota=0, totalPagar=total;
-  if(tipo==='Financiado'&&saldo>0&&n>0){cuota=tasaM===0?saldo/n:saldo*tasaM/(1-Math.pow(1+tasaM,-n));totalPagar=deposito+cuota*n;}
+  // Royal Prestige: cuota = saldo × tasa_mensual
+  let cuota=0;
+  if(tipo==='Financiado'&&saldo>0){ cuota=tasaM===0?(n>0?saldo/n:0):saldo*tasaM; }
   setText('vd-r-total-iva',fmtCOP(total));
   setText('vd-r-saldo',fmtCOP(saldo));
   setText('vd-r-cuota',fmtCOP(Math.ceil(cuota)));
-  // total pagar hidden
 }
 
 // ═══════════════════════════════════════════════════════
@@ -2022,7 +2021,7 @@ function renderCitas() {
       <td style="font-size:12px;color:var(--mt)">${esc(c.asesorNombre||'—')}</td>
       <td style="font-size:12px;color:var(--mt);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.notas||'—')}</td>
       <td>${evidCell}</td>
-      <td><div style="display:flex;gap:3px;flex-wrap:wrap">${noventaBtn}</td>
+      <td><div style="display:flex;gap:3px;flex-wrap:wrap">${termineBtn}${acciones}</div></td>
     </tr>`;
   }).join('');
 }
