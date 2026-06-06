@@ -1947,7 +1947,7 @@ function calcular() {
 
   let cuota=0, tarjetaCuota=0, totalPagar=totalConIva;
   if(tipo==='Financiado' && saldo>0 && n>0) {
-    cuota = tasaM===0 ? saldo/n : saldo*tasaM/(1-Math.pow(1+tasaM,-n));
+    cuota = tasaM===0 ? saldo/n : saldo*tasaM;
     totalPagar = deposito + cuota*n;
   }
   if(tipo==='Tarjeta' && saldo>0) {
